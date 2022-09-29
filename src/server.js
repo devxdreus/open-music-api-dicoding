@@ -4,6 +4,7 @@ const Hapi = require('@hapi/hapi');
 const albums = require('./api/albums');
 const ClientError = require('./exceptions/ClientError');
 const AlbumsService = require('./services/postgres/AlbumsService');
+const AlbumsValidator = require('./validation/albums');
 
 const init = async () => {
     const server = Hapi.server({
@@ -21,6 +22,7 @@ const init = async () => {
         plugin: albums,
         options: {
             service: new AlbumsService(),
+            validator: AlbumsValidator,
         },
     });
 
@@ -43,6 +45,7 @@ const init = async () => {
                 return h.continue;
             }
             // penanganan server error sesuai kebutuhan
+            console.error(response);
             const newResponse = h.response({
                 status: 'error',
                 message: 'terjadi kegagalan pada server kami',
