@@ -1,20 +1,34 @@
 class SongsHandler {
-    constructor(service) {
+    constructor(service, validator) {
         this._service = service;
+        this._validator = validator;
     }
 
     async postSongHandler(request, h) {
+        this._validator.validateSongPayload(request.payload);
+
         const songId = await this._service.addSong(request.payload);
 
         const response = h.response({
             status: 'success',
             data: {
-                song_id: songId,
+                songId,
             },
         });
 
         response.code(201);
         return response;
+    }
+
+    async getSongsHandler(request) {
+        const songs = await this._service.getSongs(request.query);
+
+        return {
+            status: 'success',
+            data: {
+                songs,
+            },
+        };
     }
 
     async getSongByIdHandler(request) {
@@ -25,12 +39,14 @@ class SongsHandler {
         return {
             status: 'success',
             data: {
-                songs,
+                song: songs,
             },
         };
     }
 
     async putSongByIdHandler(request) {
+        this._validator.validateSongPayload(request.payload);
+
         const { id } = request.params;
 
         await this._service.editSongById(id, request.payload);

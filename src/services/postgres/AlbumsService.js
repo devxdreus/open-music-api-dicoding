@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const { mapAlbumsToModel } = require('../../utils');
+const SongsService = require('./SongsService');
 
 class AlbumsService {
     constructor() {
@@ -45,7 +46,11 @@ class AlbumsService {
             throw new NotFoundError('Album tidak ditemukan');
         }
 
-        return result.rows.map(mapAlbumsToModel)[0];
+        const album = result.rows.map(mapAlbumsToModel)[0];
+        const songs = await new SongsService().getSongByAlbumId(id);
+        album.songs = songs;
+
+        return album;
     }
 
     async editAlbumById(id, { name, year }) {
